@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "sandbox (zig)",
+      "type": "lldb-vscode",
+      "request": "launch",
+      "stopOnEntry": false,
+      "program": "${workspaceFolder}/zig-out/bin/with_static_dpdk"
+    }
+  ]
+}

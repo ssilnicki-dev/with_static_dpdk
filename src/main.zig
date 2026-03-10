@@ -1,16 +1,14 @@
 const std = @import("std");
-const dpdk = @cImport({
-    @cInclude("rte_eal.h");
-});
+const dpdk = @import("dpdk");
 
-pub fn main() !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+pub fn main(init: std.process.Init) !void {
+    var gpa = std.heap.DebugAllocator(.{}){};
     defer _ = gpa.deinit();
     const allocator = gpa.allocator();
-    const args = try std.process.argsAlloc(allocator);
-    defer std.process.argsFree(allocator, args);
+    var args = try init.minimal.args.iterateAllocator(allocator);
+    defer args.deinit();
+    var argv0 = args.next();
 
-    if (args.len > 1) @panic("Handling command line arguments not supported here.");
-    _ = dpdk.rte_eal_init(1, @ptrCast(@alignCast(&args[0].ptr)));
+    _ = dpdk.rte_eal_init(1, @ptrCast(@alignCast(&argv0.?.ptr)));
     defer _ = dpdk.rte_eal_cleanup();
 }

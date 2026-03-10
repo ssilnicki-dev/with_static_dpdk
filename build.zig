@@ -25,7 +25,6 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
         .target = target,
         .default_library = "static",
-        .prefix = b.pathJoin(&.{ b.install_prefix, "dpdk" }),
         .install_buildtools = false,
         .install_examples = false,
         .install_usertools = false,
@@ -97,16 +96,24 @@ pub fn build(b: *std.Build) void {
         }),
     });
 
-    exe.step.dependOn(dpdk_dep.builder.default_step);
-    exe.addIncludePath(.{ .cwd_relative = b.pathJoin(&.{ b.install_prefix, "dpdk/include" }) });
-    exe.addLibraryPath(.{ .cwd_relative = b.pathJoin(&.{ b.install_prefix, "dpdk/lib" }) });
-    exe.linkSystemLibrary2("rte_eal", .{ .preferred_link_mode = .static });
-    exe.linkSystemLibrary2("rte_log", .{ .preferred_link_mode = .static });
-    exe.linkSystemLibrary2("rte_telemetry", .{ .preferred_link_mode = .static });
-    exe.linkSystemLibrary2("rte_argparse", .{ .preferred_link_mode = .static });
-    exe.linkSystemLibrary2("rte_kvargs", .{ .preferred_link_mode = .static });
-    exe.want_lto = true;
+    const translator: @import("translate_c").Translator = .init(b.dependency("translate_c", .{}), .{
+        .c_source_file = b.addWriteFiles().add("c.h",
+            \\#include <rte_eal.h>
+            \\#include <rte_errno.h>
+        ),
+        .target = target,
+        .optimize = optimize,
+    });
+    translator.addIncludePath(.{ .cwd_relative = dpdk_dep.builder.h_dir });
+    exe.root_module.addImport("dpdk", translator.mod);
+    exe.root_module.addLibraryPath(.{ .cwd_relative = dpdk_dep.builder.lib_dir });
+    exe.root_module.linkSystemLibrary("rte_eal", .{ .preferred_link_mode = .static });
+    exe.root_module.linkSystemLibrary("rte_log", .{ .preferred_link_mode = .static });
+    exe.root_module.linkSystemLibrary("rte_telemetry", .{ .preferred_link_mode = .static });
+    exe.root_module.linkSystemLibrary("rte_argparse", .{ .preferred_link_mode = .static });
+    exe.root_module.linkSystemLibrary("rte_kvargs", .{ .preferred_link_mode = .static });
 
+    exe.step.dependOn(dpdk_dep.builder.default_step);
     // This declares intent for the executable to be installed into the
     // install prefix when running `zig build` (i.e. when executing the default
     // step). By default the install prefix is `zig-out/` but can be overridden
