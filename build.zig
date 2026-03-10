@@ -105,7 +105,8 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
     translator.addIncludePath(.{ .cwd_relative = dpdk_dep.builder.h_dir });
-    exe.root_module.addImport("dpdk", translator.mod);
+    const install_translated = b.addInstallFile(translator.output_file, "../src/dpdk.zig");
+    exe.step.dependOn(&install_translated.step);
     exe.root_module.addLibraryPath(.{ .cwd_relative = dpdk_dep.builder.lib_dir });
     exe.root_module.linkSystemLibrary("rte_eal", .{ .preferred_link_mode = .static });
     exe.root_module.linkSystemLibrary("rte_log", .{ .preferred_link_mode = .static });

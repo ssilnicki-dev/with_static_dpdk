@@ -1,5 +1,5 @@
 const std = @import("std");
-const dpdk = @import("dpdk");
+const dpdk = @import("dpdk.zig");
 
 pub fn main(init: std.process.Init) !void {
     var gpa = std.heap.DebugAllocator(.{}){};
