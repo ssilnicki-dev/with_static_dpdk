@@ -106,15 +106,22 @@ pub fn build(b: *std.Build) void {
     });
     translator.addIncludePath(.{ .cwd_relative = dpdk_dep.builder.h_dir });
     const install_translated = b.addInstallFile(translator.output_file, "../src/dpdk.zig");
-    exe.step.dependOn(&install_translated.step);
-    exe.root_module.addLibraryPath(.{ .cwd_relative = dpdk_dep.builder.lib_dir });
-    exe.root_module.linkSystemLibrary("rte_eal", .{ .preferred_link_mode = .static });
-    exe.root_module.linkSystemLibrary("rte_log", .{ .preferred_link_mode = .static });
-    exe.root_module.linkSystemLibrary("rte_telemetry", .{ .preferred_link_mode = .static });
-    exe.root_module.linkSystemLibrary("rte_argparse", .{ .preferred_link_mode = .static });
-    exe.root_module.linkSystemLibrary("rte_kvargs", .{ .preferred_link_mode = .static });
+    install_translated.step.dependOn(dpdk_dep.builder.default_step);
 
-    exe.step.dependOn(dpdk_dep.builder.default_step);
+    const dpdk_mod = b.addModule("dpdk", .{
+        .root_source_file = b.path("src/dpdk.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    dpdk_mod.addLibraryPath(.{ .cwd_relative = dpdk_dep.builder.lib_dir });
+    dpdk_mod.linkSystemLibrary("rte_eal", .{ .preferred_link_mode = .static });
+    dpdk_mod.linkSystemLibrary("rte_log", .{ .preferred_link_mode = .static });
+    dpdk_mod.linkSystemLibrary("rte_telemetry", .{ .preferred_link_mode = .static });
+    dpdk_mod.linkSystemLibrary("rte_argparse", .{ .preferred_link_mode = .static });
+    dpdk_mod.linkSystemLibrary("rte_kvargs", .{ .preferred_link_mode = .static });
+
+    exe.step.dependOn(&install_translated.step);
+    exe.root_module.addImport("dpdk", dpdk_mod);
     // This declares intent for the executable to be installed into the
     // install prefix when running `zig build` (i.e. when executing the default
     // step). By default the install prefix is `zig-out/` but can be overridden
