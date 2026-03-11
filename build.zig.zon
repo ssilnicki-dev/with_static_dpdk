@@ -25,7 +25,7 @@
     .fingerprint = 0xf99d8b97a6b3b4e5, // Changing this has security and trust implications.
     // Tracks the earliest Zig version that the package considers to be a
     // supported use case.
-    .minimum_zig_version = "0.15.3-dev.3+f3fc40ddc",
+    .minimum_zig_version = "0.16.0-dev.2822+120da34a1",
     // This field is optional.
     // Each dependency must either provide a `url` and `hash`, or a `path`.
     // `zig build --fetch` can be used to fetch all dependencies of a package, recursively.
@@ -37,8 +37,8 @@
             .hash = "dpdk-25.11.0-0KI9t5-voAZ04pxOb_7NnVcdGBSY61lqqzTD4CtVkhlU",
         },
         .translate_c = .{
-            .url = "git+https://codeberg.org/ssilnicki-dev/translate-c#c1b377a82a9f0056ea7fc90688cd983b1d404d6c",
-            .hash = "translate_c-0.0.0-Q_BUWuXrBgDQK9nWi787QLmEK77IzvdvjJYHs93tHTU6",
+            .url = "git+https://codeberg.org/ssilnicki-dev/translate-c#7106684e892a1bc158a1cc550a4796b83628b6e9",
+            .hash = "translate_c-0.0.0-Q_BUWuXrBgDu-QsVm0QZ7LcAaiVDDkcl-gWa372LNMGk",
         },
     },
     .paths = .{
